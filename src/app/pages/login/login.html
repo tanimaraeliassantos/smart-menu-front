@@ -1,0 +1,18 @@
+<div class="screen">
+  <div class="card">
+    <h1>Activar tablet</h1>
+    <p class="sub">Introduce las credenciales autorizadas.</p>
+
+    <label>Email</label>
+    <input [(ngModel)]="email" type="email" placeholder="tablet@restaurante.com" />
+
+    <label>Contraseña</label>
+    <input [(ngModel)]="password" type="password" placeholder="••••••••" />
+
+    <button (click)="submit()" [disabled]="loading || !email || !password">
+      {{ loading ? 'Validando…' : 'Entrar' }}
+    </button>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+  </div>
+</div>

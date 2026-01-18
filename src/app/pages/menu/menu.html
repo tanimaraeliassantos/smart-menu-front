@@ -1,0 +1,61 @@
+
+<div class="botonSalir">
+  <button class="logout btn btn-dark" (click)="logout()">Salir</button>
+
+</div>
+<div class="menu">
+  <header class="top">
+    <div class="top-row">
+      <div class="title">Menú</div>
+
+      <div class="order-mini" *ngIf="modo === 'armar'">
+        <span>{{ totalItems }} items</span>
+        <span class="dot">•</span>
+        <span>{{ totalEuros | number:'1.2-2' }} €</span>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <input class="search" placeholder="Buscar..." [(ngModel)]="search" />
+    </div>
+
+    <div class="chips">
+      <button class="chip" [class.active]="catActiva===null" (click)="setCat(null)">Todo</button>
+      <button class="chip" *ngFor="let c of categorias"
+              [class.active]="catActiva===c"
+              (click)="setCat(c)">
+        {{ c }}
+      </button>
+    </div>
+  </header>
+
+  <main class="grid" role="list">
+    <button class="card" *ngFor="let p of productosFiltrados()" (click)="openProducto(p)">
+      <div class="img">
+        <!-- si luego sirves imágenes desde backend, aquí p.imagen -->
+        <div style="object-fit: cover !important" class="img-ph">
+            <img src="{{p.imagen}}" alt="imagen del menu">
+        </div>
+      </div>
+
+      <div class="meta">
+        <div class="name">{{ p.nombre }}</div>
+        <div class="desc">{{ p.descripcion }}</div>
+        <div class="price">{{ p.precioConIva | number:'1.2-2' }} €</div>
+      </div>
+
+      <!-- Controles SOLO en modo armar -->
+      <div class="controls" *ngIf="modo==='armar'" (click)="$event.stopPropagation()">
+    <button class="qty" (click)="$event.stopPropagation(); dec(p)">−</button>
+    <div class="count">{{ getQty(p) }}</div>
+    <button class="qty" (click)="$event.stopPropagation(); inc(p)">+</button>
+  </div>
+    </button>
+  </main>
+
+  <!-- Barra inferior SOLO en modo armar -->
+  <div class="bottom" *ngIf="modo==='armar'" style="display: flex; justify-content: center; align-items: center;">
+   
+    <button style="width: 60%;" class=" bottom-btn bg-dark" (click)="goToCart()">Confirmar</button>
+  </div>
+</div>
