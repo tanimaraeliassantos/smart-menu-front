@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 
 export type ItemCarrito = {
-  productoId: string;     // id del producto (string)
+  // lo dejamos opcional, así podemos NO mandarlo si queremos
+  productoId?: string;
+
   nombreActual: string;
-  precioActual: number;   // precio unitario
+  precioActual: number;
   cantidad: number;
   nota?: string;
 };

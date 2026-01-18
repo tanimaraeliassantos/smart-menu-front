@@ -5,6 +5,11 @@ import { FormsModule } from '@angular/forms';
 
 import { MenuService } from '../../api/menu-service';
 import { AuthService } from '../../api/auth-service';
+import { PedidoStore,ItemCarrito } from '../../state/pedido.sotore';
+
+//AQUIIIII FUNCIONAAA
+
+// import { OrderStore, CartItem } from '../../state/order.storage';
 
 type ProductoVM = {
   id: any;
@@ -14,6 +19,7 @@ type ProductoVM = {
   imagen?: string;
   categoria?: string;
   qty: number;
+  
 };
 
 @Component({
@@ -28,14 +34,16 @@ export class Menu implements OnInit {
   search = '';
   categorias: string[] = ['Entrantes', 'Principales', 'Postres', 'Bebidas'];
   catActiva: string | null = null;
-
+  cart: Record<string, number> = {};
   productos: ProductoVM[] = [];
+  carrito: Record<string, number> = {};
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private menuService: MenuService,
-    private auth: AuthService
+  private route: ActivatedRoute,
+  private router: Router,
+  private menuService: MenuService,
+  private auth: AuthService,
+  private pedidoStore: PedidoStore
   ) {}
 
   // Totales calculados sobre qty por producto (NO hay claves compartidas)
@@ -109,9 +117,27 @@ export class Menu implements OnInit {
     // futuro detalle
   }
 
-  goToCart() {
-    this.router.navigate(['/pedir']);
-  }
+ irAPedir() {
+  // Construimos los items a partir de los productos que tengan qty > 0
+  const items: ItemCarrito[] = this.productos
+    .filter(p => (p.qty || 0) > 0)
+    .map(p => ({
+      productoId: String(p.id),                 // por si viene como ObjectId raro
+      nombreActual: p.nombre,
+      precioActual: Number(p.precioConIva || 0),
+      cantidad: p.qty || 0,
+      nota: '',
+    }));
+
+  // Guardamos en el store
+  this.pedidoStore.guardarItems(items);
+
+  // Navegamos a /pedir
+  this.router.navigate(['/pedir']);
+}
+
+
+
 
   logout() {
     this.auth.clear();

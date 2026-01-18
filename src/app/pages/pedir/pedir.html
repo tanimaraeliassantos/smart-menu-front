@@ -1,1 +1,98 @@
-<p>pedir works!</p>
+<div class="pedido">
+
+  <!-- CABECERA -->
+  <header class="top">
+    <div class="top-row">
+      <div class="title">Tu pedido</div>
+
+      <div class="resumen-mini" *ngIf="items.length > 0">
+        <span>{{ items.length }} línea(s)</span>
+        <span class="dot">•</span>
+        <span>{{ totalEuros | number:'1.2-2' }} €</span>
+      </div>
+    </div>
+
+    <!-- Campo opcional para mesa -->
+    <div class="mesa-row" *ngIf="items.length > 0">
+      <label for="mesa">Mesa:</label>
+      <input id="mesa" type="text" [(ngModel)]="mesa" placeholder="Mesa 1" />
+    </div>
+  </header>
+
+  <!-- MENSAJES -->
+  <div class="mensaje ok" *ngIf="mensajeOk">
+    {{ mensajeOk }}
+  </div>
+  <div class="mensaje error" *ngIf="mensajeError">
+    {{ mensajeError }}
+  </div>
+
+  <!-- SIN ITEMS -->
+  <div *ngIf="items.length === 0" class="sin-items">
+    <p>No tienes productos en el pedido.</p>
+    <button class="btn btn-dark" (click)="volverAlMenu()">
+      Volver al menú
+    </button>
+  </div>
+
+  <!-- LISTA DE ITEMS -->
+  <main *ngIf="items.length > 0" class="lista-pedido">
+
+    <div class="linea" *ngFor="let item of items">
+      <div class="linea-info-principal">
+        <div class="nombre">{{ item.nombreActual }}</div>
+        <div class="precio-unitario">
+          {{ item.precioActual | number:'1.2-2' }} €/ud
+        </div>
+      </div>
+
+      <div class="linea-controles">
+        <button class="btn-cantidad" (click)="cambiarCantidad(item, -1)">−</button>
+        <div class="cantidad">{{ item.cantidad }}</div>
+        <button class="btn-cantidad" (click)="cambiarCantidad(item, 1)">+</button>
+
+        <div class="subtotal">
+          {{ (item.cantidad || 0) * (item.precioActual || 0) | number:'1.2-2' }} €
+        </div>
+      </div>
+
+      <div class="nota">
+        <label>Nota para cocina:</label>
+        <textarea
+          rows="2"
+          [(ngModel)]="item.nota"
+          (ngModelChange)="cambiarNota(item, $event)"
+          placeholder="Sin cebolla, poco hecho..."
+        ></textarea>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- PIE: TOTAL Y BOTONES -->
+  <footer *ngIf="items.length > 0" class="pie">
+
+    <div class="totales">
+      <span>Total:</span>
+      <span class="total-euros">{{ totalEuros | number:'1.2-2' }} €</span>
+    </div>
+
+    <div class="acciones">
+      <button class="btn btn-outline-secondary" (click)="vaciarCarrito()">
+        Vaciar
+      </button>
+
+      <button class="btn btn-light" (click)="volverAlMenu()">
+        Seguir pidiendo
+      </button>
+
+      <button class="btn btn-dark"
+              [disabled]="enviando || !items.length"
+              (click)="confirmarPedido()">
+        {{ enviando ? 'Enviando...' : 'Confirmar pedido' }}
+      </button>
+    </div>
+
+  </footer>
+
+</div>

@@ -1,0 +1,152 @@
+.pedido {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.resumen-mini {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.dot {
+  margin: 0 4px;
+}
+
+.mesa-row {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.mesa-row input {
+  flex: 1;
+  padding: 6px 8px;
+}
+
+.mensaje {
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.mensaje.ok {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.mensaje.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.sin-items {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.lista-pedido {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linea {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+}
+
+.linea-info-principal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.nombre {
+  font-weight: 600;
+}
+
+.precio-unitario {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.linea-controles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-cantidad {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  border: 1px solid #333;
+  background: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.cantidad {
+  min-width: 24px;
+  text-align: center;
+}
+
+.subtotal {
+  margin-left: auto;
+  font-weight: 600;
+}
+
+.nota textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 6px 8px;
+}
+
+.pie {
+  border-top: 1px solid #ddd;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.totales {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+}
+
+.total-euros {
+  font-weight: 700;
+}
+
+.acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.acciones .btn {
+  flex: 1;
+}
