@@ -7,13 +7,13 @@
   </header>
 
   <main class="barra-columnas">
-    <section class="kanban-col" aria-labelledby="header-nuevos">
-      <h2 id="header-nuevos" class="col-header">Nuevos Pedidos</h2>
+    <section class="kanban-col" aria-labelledby="header-recibidos">
+      <h2 id="header-recibidos" class="col-header">Recibidos</h2>
       <div class="lista-pedidos">
-        @for (mesa of getMesasEnEstado('NUEVO'); track mesa) {
+        @for (mesa of getMesasEnEstado('RECIBIDO'); track mesa) {
           <div class="mesa-group">
             <span class="mesa-badge">Mesa {{ mesa }}</span>
-            @for (p of getPedidosDeMesaEnEstado(mesa, 'NUEVO'); track p.id) {
+            @for (p of getPedidosDeMesaEnEstado(mesa, 'RECIBIDO'); track p.id) {
               <ng-container *ngTemplateOutlet="ticket; context: { $implicit: p }"></ng-container>
             }
           </div>
@@ -26,10 +26,10 @@
     <section class="kanban-col" aria-labelledby="header-preparando">
       <h2 id="header-preparando" class="col-header">Preparando</h2>
       <div class="lista-pedidos">
-        @for (mesa of getMesasEnEstado('EN_PREPARACION'); track mesa) {
+        @for (mesa of getMesasEnEstado('PREPARANDO'); track mesa) {
           <div class="mesa-group">
             <span class="mesa-badge">Mesa {{ mesa }}</span>
-            @for (p of getPedidosDeMesaEnEstado(mesa, 'EN_PREPARACION'); track p.id) {
+            @for (p of getPedidosDeMesaEnEstado(mesa, 'PREPARANDO'); track p.id) {
               <ng-container *ngTemplateOutlet="ticket; context: { $implicit: p }"></ng-container>
             }
           </div>
@@ -76,7 +76,7 @@
 <ng-template #ticket let-p>
   <article class="tarjeta-pedido">
     <section class="tarjeta-items">
-      @for (item of p.items; track $index) {
+      @for (item of p.lineasPedido; track $index) {
         <div class="item-linea">
           <strong class="item-cantidad">{{ item.cantidad }}x</strong>
           <span class="item-nombre">{{ item.nombreActual }}</span>
@@ -89,7 +89,7 @@
 
     <footer class="acciones-grid">
       @if (puedePasarAEnPreparacion(p)) {
-        <button type="button" class="btn-accion" (click)="actualizarEstado(p, 'EN_PREPARACION')">
+        <button type="button" class="btn-accion" (click)="actualizarEstado(p, 'PREPARANDO')">
           Preparar
         </button>
       }

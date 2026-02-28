@@ -12,7 +12,7 @@ export class AuthService {
 
   private http = inject(HttpClient);
 
-  constructor() {}
+  constructor() { }
 
   login(email: string, password: string) {
     return this.http

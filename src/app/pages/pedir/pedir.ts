@@ -35,7 +35,7 @@ export class Pedir implements OnInit, OnDestroy {
   /** Controla si se debe mostrar la vista de seguimiento del pedido. */
   pedidoConfirmado = false;
   /** Estado actual de la comanda en el flujo de trabajo. */
-  estadoActual = 'NUEVO';
+  estadoActual = 'RECIBIDO';
   /** Suscripción para la comprobación periódica de cambios de estado. */
   private vigilanciaSub?: Subscription;
 
@@ -43,7 +43,7 @@ export class Pedir implements OnInit, OnDestroy {
     private pedidoStore: PedidoStore,
     private pedidoService: PedidoService,
     private router: Router,
-  ) {}
+  ) { }
 
   /**
    * Carga los datos iniciales y recupera el estado de seguimiento si existe un pedido previo.
@@ -145,7 +145,9 @@ export class Pedir implements OnInit, OnDestroy {
   volverAlMenu() {
     this.router.navigate(['/menu'], { queryParams: { modo: 'armar' } });
   }
-
+private esObjectId(val: any): boolean {
+  return typeof val === 'string' && /^[a-fA-F0-9]{24}$/.test(val);
+}
   /**
    * Empaqueta los productos nuevos y los envía como una ronda independiente a cocina.
    */
@@ -164,13 +166,32 @@ export class Pedir implements OnInit, OnDestroy {
 
     const idComanda = 'cmd-' + Date.now();
 
+    
+
+
+// valida que TODOS los productoId sean ObjectId válido (24 hex)
+const invalidos = productosNuevos.filter(p => !/^[a-fA-F0-9]{24}$/.test(String(p.productoId || '')));
+
+if (invalidos.length > 0) {
+  this.mensajeError = 'Hay productos con ID invalido. Vacía carrito y vuelve a añadirlos.';
+  console.error('ProductoId inválidos:', invalidos.map(x => x.productoId));
+  this.enviando = false;
+  return;
+}
     const cuerpo: NuevoPedido = {
-      estadoPedido: 'NUEVO',
+      usuarioId: '699f5c8e6ae58a27470461c2', // de momento fijo, luego lo sacamos del login
+      mesaId: this.mesa,
+      estado: 'RECIBIDO',
       nota: this.nota || '',
-      items: JSON.parse(JSON.stringify(productosNuevos)),
-      total: productosNuevos.reduce((s, i) => s + i.cantidad * i.precioActual, 0),
-      fechaCreacion: new Date().toISOString(),
-      mesa: this.mesa,
+      lineasPedido: productosNuevos.map(i => ({
+        productoId: i.productoId!,      // importante: debe existir
+        nombreActual: i.nombreActual,
+        precioActual: i.precioActual,
+        cantidad: i.cantidad,
+        nota: i.nota || ''
+      })),
+      totalPedido: productosNuevos.reduce((s, i) => s + i.cantidad * i.precioActual, 0),
+      fechaCreacion: new Date().toISOString().slice(0, 19) // sin Z para LocalDateTime
     };
 
     const finalizarEnvioLocal = (idParaGuardar: string) => {
@@ -185,8 +206,8 @@ export class Pedir implements OnInit, OnDestroy {
       setTimeout(() => {
         this.mensajeOk = '';
         this.pedidoConfirmado = true;
-        this.estadoActual = 'NUEVO';
-        localStorage.setItem('ultimo_estado_pedido', 'NUEVO');
+        this.estadoActual = 'RECIBIDO';
+        localStorage.setItem('ultimo_estado_pedido', 'RECIBIDO');
         this.enviando = false;
         this.iniciarVigilanciaEstado();
       }, 2000);
@@ -197,11 +218,10 @@ export class Pedir implements OnInit, OnDestroy {
         const idReal = pedidoCreado.id || pedidoCreado._id;
         finalizarEnvioLocal(idReal);
       },
-
       error: (err) => {
-        console.warn('Usando modo local por falta de conexión.');
-        const idTemporal = 'cmd-' + Date.now();
-        finalizarEnvioLocal(idTemporal);
+        console.error('Error creando pedido:', err);
+        this.mensajeError = 'No se pudo enviar el pedido al servidor.';
+        this.enviando = false;
       },
     });
   }
@@ -209,10 +229,11 @@ export class Pedir implements OnInit, OnDestroy {
   /** Devuelve el porcentaje numérico de progreso según el estado actual. */
   getProgresoPorcentaje(): number {
     const mapa: Record<string, number> = {
-      NUEVO: 20,
-      EN_PREPARACION: 60,
+      RECIBIDO: 20,
+      PREPARANDO: 60,
       LISTO: 90,
       ENTREGADO: 100,
+      CANCELADO: 0,
     };
     return mapa[this.estadoActual] || 0;
   }
@@ -220,10 +241,11 @@ export class Pedir implements OnInit, OnDestroy {
   /** Traduce el estado técnico a un mensaje amigable para el cliente. */
   textoEstadoBonito(estado: string): string {
     const nombres: Record<string, string> = {
-      NUEVO: 'Recibido en cocina',
-      EN_PREPARACION: 'En preparación...',
+      RECIBIDO: 'Recibido en cocina',
+      PREPARANDO: 'En preparación...',
       LISTO: '¡Listo! 🍽️',
       ENTREGADO: '¡Buen provecho!',
+      CANCELADO: 'Cancelado',
     };
     return nombres[estado] || estado;
   }
@@ -232,7 +254,7 @@ export class Pedir implements OnInit, OnDestroy {
   finalizarCicloPedido() {
     localStorage.removeItem('ultimo_estado_pedido');
     this.pedidoConfirmado = false;
-    this.estadoActual = 'NUEVO';
+    this.estadoActual = 'RECIBIDO';
   }
 
   /** Filtra los productos que ya están confirmados por cocina. */

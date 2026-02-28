@@ -8,12 +8,12 @@ import { PedidoStore } from '../../state/pedido.store';
  */
 type PedidoVM = {
   id: string;
-  estadoPedido: string;
+  estado: string;
   nota: string;
-  items: any[];
-  total: number;
+  lineasPedido: any[];
+  totalPedido: number;
   fechaCreacion: string;
-  mesa: string;
+  mesaId: string;
 };
 
 @Component({
@@ -27,13 +27,13 @@ export class Barra implements OnInit {
   pedidos: PedidoVM[] = [];
   cargando = false;
   error = '';
-  estadoSeleccionado: string = 'NUEVO';
+  estadoSeleccionado: string = 'RECIBIDO';
   mensajeAccion = '';
 
   constructor(
     private pedidoService: PedidoService,
     private pedidoStore: PedidoStore,
-  ) {}
+  ) { }
 
   ngOnInit() {
     console.log('barra iniciando');
@@ -78,13 +78,13 @@ export class Barra implements OnInit {
           const idFinal = this.normalizarId(p.id) || this.normalizarId(p._id);
 
           return {
-            id: idFinal, // <--- Aquí ya no será [object Object]
-            estadoPedido: (p.estadoPedido || 'NUEVO').toUpperCase(),
+            id: idFinal,
+            estado: (p.estado || 'RECIBIDO').toUpperCase(),
             nota: p.nota ?? '',
-            items: p.items ?? [],
-            total: Number(p.total ?? 0),
+            lineasPedido: p.lineasPedido ?? [],
+            totalPedido: Number(p.totalPedido ?? 0),
             fechaCreacion: p.fechaCreacion ?? '',
-            mesa: p.mesa ?? 'S/M',
+            mesaId: p.mesaId ?? 'S/M',
           };
         });
         this.cargando = false;
@@ -100,8 +100,8 @@ export class Barra implements OnInit {
 
     this.pedidoService.actualizarEstadoPedido(p.id, nuevoEstado).subscribe({
       next: () => {
-        p.estadoPedido = nuevoEstado;
-        this.mensajeAccion = `✅ Pedido de la ${p.mesa} marcado como ${this.textoEstadoBonito(nuevoEstado)}`;
+        p.estado = nuevoEstado;
+        this.mensajeAccion = `Pedido de la ${p.mesaId} marcado como ${this.textoEstadoBonito(nuevoEstado)}`;
 
         // Sincronización local opcional para compatibilidad con la vigilancia del cliente
         localStorage.setItem('ultimo_estado_pedido', nuevoEstado);
@@ -118,23 +118,22 @@ export class Barra implements OnInit {
   /**
    * Lógica de filtrado y visualización
    */
-  pedidosFiltrados(): PedidoVM[] {
-    return this.pedidos.filter((p) => p.estadoPedido === this.estadoSeleccionado);
-  }
+ pedidosFiltrados() {
+  return this.pedidos.filter(p => p.estado === this.estadoSeleccionado);
+}
 
-  getMesasEnEstado(estado: string): string[] {
-    const mesas = this.pedidos.filter((p) => p.estadoPedido === estado).map((p) => p.mesa);
-    return [...new Set(mesas)].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-  }
+getMesasEnEstado(estado: string) {
+  return [...new Set(this.pedidos.filter(p => p.estado === estado).map(p => p.mesaId))];
+}
 
   getPedidosDeMesaEnEstado(mesa: string, estado: string): PedidoVM[] {
-    return this.pedidos.filter((p) => p.mesa === mesa && p.estadoPedido === estado);
+    return this.pedidos.filter((p) => p.mesaId === mesa && p.estado === estado);
   }
 
   actualizarEstadoMesaCompleta(mesa: string, nuevoEstado: string) {
     // Buscamos los pedidos de esa mesa que NO están en el nuevo estado todavía
     const pedidosMesa = this.pedidos.filter(
-      (p) => p.mesa === mesa && p.estadoPedido !== nuevoEstado,
+      (p) => p.mesaId === mesa && p.estado !== nuevoEstado,
     );
     pedidosMesa.forEach((p) => this.actualizarEstado(p, nuevoEstado));
   }
@@ -143,28 +142,27 @@ export class Barra implements OnInit {
     this.estadoSeleccionado = estado;
   }
 
-  textoEstadoBonito(estado: string): string {
-    const mapa: Record<string, string> = {
-      NUEVO: 'Nuevo',
-      EN_PREPARACION: 'En preparación',
-      LISTO: 'Listo para servir',
-      ENTREGADO: 'Entregado',
-      CANCELADO: 'Cancelado',
-    };
-    return mapa[estado] || estado;
-  }
+textoEstadoBonito(estado: string): string {
+  const mapa: Record<string, string> = {
+    RECIBIDO: 'Recibido',
+    PREPARANDO: 'En preparación',
+    LISTO: 'Listo para servir',
+    ENTREGADO: 'Entregado',
+    CANCELADO: 'Cancelado',
+  };
+  return mapa[estado] || estado;
+}
 
-  // Validadores de botones
-  puedePasarAEnPreparacion(p: PedidoVM) {
-    return p.estadoPedido === 'NUEVO';
-  }
-  puedePasarAListo(p: PedidoVM) {
-    return p.estadoPedido === 'EN_PREPARACION';
-  }
-  puedePasarAEntregado(p: PedidoVM) {
-    return p.estadoPedido === 'LISTO';
-  }
-  puedeCancelar(p: PedidoVM) {
-    return ['NUEVO', 'EN_PREPARACION'].includes(p.estadoPedido);
-  }
+puedePasarAEnPreparacion(p: PedidoVM) {
+  return p.estado === 'RECIBIDO';
+}
+puedePasarAListo(p: PedidoVM) {
+  return p.estado === 'PREPARANDO';
+}
+puedePasarAEntregado(p: PedidoVM) {
+  return p.estado === 'LISTO';
+}
+puedeCancelar(p: PedidoVM) {
+  return ['RECIBIDO', 'PREPARANDO'].includes(p.estado);
+}
 }

@@ -83,31 +83,33 @@ export class Menu implements OnInit {
         this.productos = lista.map((p: any) => {
           // GENERACIÓN DE ID ULTRA-SIMPLE:
           // Si hay ID lo usamos, si no, el nombre. Siempre a minúsculas y sin espacios.
-          const rawId =
-            p.id?.$oid ||
-            p._id?.$oid ||
-            (typeof p.id === 'string' ? p.id : null) ||
-            (typeof p._id === 'string' ? p._id : null) ||
-            p.nombre ||
-            'sin-nombre';
+const rawId =
+  p.id?.$oid ||
+  p._id?.$oid ||
+  p._id?.hexString ||     // ✅ CLAVE para ObjectId Java
+  p.id?.hexString ||
+  (typeof p.id === 'string' ? p.id : null) ||
+  (typeof p._id === 'string' ? p._id : null) ||
+  null;
 
-          const idLimpio = String(rawId).trim().toLowerCase().replace(/\s+/g, '');
+const idLimpio = rawId ? String(rawId) : '';
+const idEsValido = /^[a-fA-F0-9]{24}$/.test(idLimpio);
 
           // Sincronizar cantidad
           const coincidencia = itemsEnCarrito.find(
             (i) => String(i.productoId).toLowerCase() === idLimpio && !i.enviado,
           );
 
-          return {
-            id: idLimpio,
-            nombre: p.nombre || 'Sin nombre',
-            descripcion: p.descripcion || '',
-            precioConIva: Number(p.precio || p.precioConIva || 0),
-            imagen: p.imagen,
-            categoria: p.categoria || 'Otros',
-            kcal: p.kcal || 0,
-            qty: coincidencia ? Number(coincidencia.cantidad) : 0,
-          };
+         return {
+  id: idLimpio,
+  nombre: p.nombre || 'Sin nombre',
+  descripcion: p.descripcion || '',
+  precioConIva: Number(p.precioConIva ?? p.precio ?? 0),
+  imagen: p.imagen,
+  categoria: p.categoria || 'Otros',
+  kcal: p.kcal || 0,
+  qty: coincidencia ? Number(coincidencia.cantidad) : 0,
+};
         });
 
         console.log('PRODUCTOS PROCESADOS:', this.productos);

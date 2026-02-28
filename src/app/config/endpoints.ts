@@ -16,7 +16,6 @@ export const endpoints = {
   orders: {
     create: '/pedido', // Cambiado a singular para coincidir con el controlador
     list: '/pedido',
-    myOrders: '/pedido/mios',
     status: (id: string) => `/pedido/${id}/estado`,
   },
 

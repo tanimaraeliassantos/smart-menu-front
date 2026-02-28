@@ -9,18 +9,19 @@ import { endpoints } from '../config/endpoints';
  * Se utiliza exclusivamente en el proceso de creación desde la mesa.
  */
 export interface NuevoPedido {
-  /** Estado inicial del pedido */
-  estadoPedido: string;
-  /** Comentarios adicionales del cliente */
+  usuarioId: string;
+  mesaId: string;
+  estado: 'RECIBIDO' | 'PREPARANDO' | 'LISTO' | 'ENTREGADO' | 'CANCELADO';
   nota: string;
-  /** Listado de productos extraídos del {@link PedidoStore} */
-  items: ItemCarrito[];
-  /** Importe total de la transacción */
-  total: number;
-  /** TImestamp de la operación */
+  lineasPedido: Array<{
+    productoId: string;
+    nombreActual: string;
+    precioActual: number;
+    cantidad: number;
+    nota?: string;
+  }>;
+  totalPedido: number;
   fechaCreacion: string;
-  /** Identificador de la mesa física */
-  mesa: string;
 }
 
 /** Estructura de datos de un pedido retornado por la base de datos.
@@ -29,12 +30,22 @@ export interface NuevoPedido {
 export interface PedidoBackend {
   id?: string;
   _id?: string;
-  estadoPedido: string;
+
+  usuarioId?: string;
+  mesaId: string;
+  estado: 'RECIBIDO' | 'PREPARANDO' | 'LISTO' | 'ENTREGADO' | 'CANCELADO';
   nota: string;
-  items: any[];
-  total: number;
+
+  lineasPedido: Array<{
+    productoId: string;
+    nombreActual: string;
+    precioActual: number;
+    cantidad: number;
+    nota?: string;
+  }>;
+
+  totalPedido: number;
   fechaCreacion: string;
-  mesa: string;
 }
 
 /**
