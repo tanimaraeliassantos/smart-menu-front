@@ -11,7 +11,7 @@ export enum GoalType {
 }
 
 export interface RecommendationRequest {
-  restauranteId: string;
+  restauranteId?: string;
   edad: number;
   pesoKg: number;
   alturaCm: number;
