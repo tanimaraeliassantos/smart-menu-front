@@ -28,6 +28,8 @@ export class AuthService {
       );
   }
 
+  
+
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
@@ -51,3 +53,4 @@ export class AuthService {
     return !!this.getToken();
   }
 }
+
