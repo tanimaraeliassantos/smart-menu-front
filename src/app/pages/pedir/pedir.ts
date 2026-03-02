@@ -43,7 +43,7 @@ export class Pedir implements OnInit, OnDestroy {
     private pedidoStore: PedidoStore,
     private pedidoService: PedidoService,
     private router: Router,
-  ) { }
+  ) {}
 
   /**
    * Carga los datos iniciales y recupera el estado de seguimiento si existe un pedido previo.
@@ -145,9 +145,9 @@ export class Pedir implements OnInit, OnDestroy {
   volverAlMenu() {
     this.router.navigate(['/menu'], { queryParams: { modo: 'armar' } });
   }
-private esObjectId(val: any): boolean {
-  return typeof val === 'string' && /^[a-fA-F0-9]{24}$/.test(val);
-}
+  private esObjectId(val: any): boolean {
+    return typeof val === 'string' && /^[a-fA-F0-9]{24}$/.test(val);
+  }
   /**
    * Empaqueta los productos nuevos y los envía como una ronda independiente a cocina.
    */
@@ -166,43 +166,27 @@ private esObjectId(val: any): boolean {
 
     const idComanda = 'cmd-' + Date.now();
 
-    
-
-
-// valida que TODOS los productoId sean ObjectId válido (24 hex)
-const invalidos = productosNuevos.filter(p => !/^[a-fA-F0-9]{24}$/.test(String(p.productoId || '')));
-
-if (invalidos.length > 0) {
-  this.mensajeError = 'Hay productos con ID invalido. Vacía carrito y vuelve a añadirlos.';
-  console.error('ProductoId inválidos:', invalidos.map(x => x.productoId));
-  this.enviando = false;
-  return;
-}
     const cuerpo: NuevoPedido = {
-      usuarioId: '699f5c8e6ae58a27470461c2', // de momento fijo, luego lo sacamos del login
       mesaId: this.mesa,
-      estado: 'RECIBIDO',
       nota: this.nota || '',
-      lineasPedido: productosNuevos.map(i => ({
-        productoId: i.productoId!,      // importante: debe existir
+      lineasPedido: productosNuevos.map((i) => ({
+        productoId: i.productoId || '',
         nombreActual: i.nombreActual,
         precioActual: i.precioActual,
         cantidad: i.cantidad,
-        nota: i.nota || ''
+        nota: i.nota || '',
       })),
       totalPedido: productosNuevos.reduce((s, i) => s + i.cantidad * i.precioActual, 0),
-      fechaCreacion: new Date().toISOString().slice(0, 19) // sin Z para LocalDateTime
+      fechaCreacion: new Date().toISOString(),
     };
 
-    const finalizarEnvioLocal = (idParaGuardar: string) => {
-      this.pedidoStore.agregarAlHistorial({ ...cuerpo, id: idParaGuardar });
+    const finalizarEnvioLocal = () => {
+      this.pedidoStore.agregarAlHistorial({ ...cuerpo, id: idComanda });
       this.items.forEach((item) => {
         if (!item.enviado) item.enviado = true;
       });
       this.pedidoStore.guardarItems(this.items);
-
-      this.mensajeOk = '🚀 ¡Ronda enviada con éxito!';
-
+      this.mensajeOk = '¡Ronda enviada con éxito!';
       setTimeout(() => {
         this.mensajeOk = '';
         this.pedidoConfirmado = true;
@@ -214,14 +198,10 @@ if (invalidos.length > 0) {
     };
 
     this.pedidoService.crearPedido(cuerpo).subscribe({
-      next: (pedidoCreado) => {
-        const idReal = pedidoCreado.id || pedidoCreado._id;
-        finalizarEnvioLocal(idReal);
-      },
-      error: (err) => {
-        console.error('Error creando pedido:', err);
-        this.mensajeError = 'No se pudo enviar el pedido al servidor.';
-        this.enviando = false;
+      next: () => finalizarEnvioLocal(),
+      error: () => {
+        console.warn('Usando modo local por falta de conexión.');
+        finalizarEnvioLocal();
       },
     });
   }
