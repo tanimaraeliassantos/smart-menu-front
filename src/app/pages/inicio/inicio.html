@@ -5,6 +5,7 @@
   <div class="content-wrapper">
     <header class="brand">
       <div class="logo-container">
+        <div class="logo-icon">SM</div>
         <h1 class="logo-text">Smart<span>Menu</span></h1>
       </div>
       <p class="subtitle">Descubre una nueva forma de pedir</p>
@@ -20,36 +21,9 @@
 
       <button type="button" class="action-card" (click)="goToBuild()">
         <div class="action-info">
-          <h2 class="action-title">Carta Completa</h2>
+          <h2 class="action-title">Menú Completo</h2>
           <p class="action-desc">Explora y gestiona tu pedido</p>
         </div>
       </button>
     </nav>
-    <button
-      type="button"
-      class="fab-bell"
-      (click)="openCallService()"
-      aria-label="Llamar al servicio"
-    >
-      <span aria-hidden="true">🔔</span>
-    </button>
-  </div>
-
-  @if (callModalOpen) {
-    <div class="backdrop" (click)="closeCallService()"></div>
-    <div class="modal">
-      <h2 class="modal-title">¿Llamar al servicio?</h2>
-      <p class="modal-desc">Avisaremos al camarero para que se acerque a tu mesa.</p>
-      <div class="modal-actions">
-        <button type="button" class="btn ghost" (click)="closeCallService()">Cancelar</button>
-        <button type="button" class="btn primary" (click)="confirmCallService()">
-          Llamar ahora
-        </button>
-      </div>
-    </div>
-  }
-
-  @if (toastMsg()) {
-    <div class="toast">{{ toastMsg() }}</div>
-  }
 </div>
