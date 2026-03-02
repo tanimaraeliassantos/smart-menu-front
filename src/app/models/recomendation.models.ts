@@ -25,7 +25,7 @@ export interface RecommendationRequest {
 export interface MenuSuggestion {
   productos: any[];
   kcalTotal: number;
-  precioTotal: number;
+  proteTotal: number;
 }
 
 export interface RecommendationResponse {
